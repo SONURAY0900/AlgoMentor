@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — AlgoMentor</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    // Same theme setting as the app (applied before paint)
+    (function () {
+      let t = null;
+      try { t = localStorage.getItem('codetutor-theme'); } catch (e) {}
+      if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-2: #f1f2f5;
+      --border: #e3e5ea;
+      --text: #16181d;
+      --text-2: #3f4350;
+      --muted: #727786;
+      --accent: #4f46e5;
+      --accent-soft: rgba(79, 70, 229, 0.09);
+      --accent-text: #ffffff;
+      --ok: #15803d;
+      --ok-soft: rgba(21, 128, 61, 0.1);
+      --warn: #c2410c;
+      --warn-soft: rgba(194, 65, 12, 0.1);
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
+      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0d0e12;
+      --surface: #16181e;
+      --surface-2: #1d2027;
+      --border: #2a2d36;
+      --text: #ebedf2;
+      --text-2: #c4c7d0;
+      --muted: #8d92a0;
+      --accent: #8b85ff;
+      --accent-soft: rgba(139, 133, 255, 0.13);
+      --accent-text: #0d0e12;
+      --ok: #4ade80;
+      --ok-soft: rgba(74, 222, 128, 0.12);
+      --warn: #fb923c;
+      --warn-soft: rgba(251, 146, 60, 0.12);
+      --shadow: none;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    a { color: inherit; }
+
+    /* ─── Top bar ─── */
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 960px; margin: 0 auto; padding: 12px 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+    .brand-mark {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--accent); color: var(--accent-text);
+      display: grid; place-items: center;
+      font-family: var(--mono); font-weight: 600; font-size: 12px;
+    }
+    .brand-name { font-weight: 700; font-size: 14px; }
+    .nav-link { font-size: 13px; color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; }
+    .nav-link:hover { color: var(--text); background: var(--surface-2); }
+    .btn {
+      border: 1px solid var(--border); background: var(--surface);
+      border-radius: 8px; padding: 6px 12px; font-size: 13px; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+    .btn.primary:hover { opacity: 0.9; background: var(--accent); }
+
+    /* ─── Layout ─── */
+    .page { max-width: 960px; margin: 0 auto; padding: 0 24px 64px; }
+    section { padding-top: 56px; scroll-margin-top: 64px; }
+    .eyebrow {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 8px;
+    }
+    h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
+    .lead { color: var(--text-2); margin-top: 10px; max-width: 680px; }
+    p + p { margin-top: 12px; }
+
+    /* Hero */
+    .hero { padding-top: 64px; }
+    .hero h1 { font-size: 38px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; max-width: 720px; }
+    .hero h1 span { color: var(--accent); }
+    .tagline { font-size: 18px; font-weight: 600; color: var(--text); margin-top: 6px; }
+    .hero .lead { font-size: 16.5px; }
+    .hero-actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+    .hero-actions .btn { padding: 9px 16px; font-size: 14px; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 40px; }
+    .stat {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 18px; box-shadow: var(--shadow);
+    }
+    .stat b { display: block; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); }
+    .stat span { font-size: 13px; color: var(--muted); }
+
+    /* Cards */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; box-shadow: var(--shadow);
+    }
+    .card-icon {
+      width: 36px; height: 36px; border-radius: 9px; margin-bottom: 12px;
+      background: var(--accent-soft); display: grid; place-items: center; font-size: 17px;
+    }
+    .card h3 { font-size: 15.5px; font-weight: 650; }
+    .card .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .card p { font-size: 14px; color: var(--text-2); margin-top: 10px; }
+    .card code, .flow code {
+      font-family: var(--mono); font-size: 12.5px;
+      background: var(--surface-2); border: 1px solid var(--border); padding: 0 5px; border-radius: 4px;
+    }
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .pill {
+      font-size: 11.5px; font-weight: 500; padding: 2px 9px; border-radius: 999px;
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2);
+    }
+
+    /* Pipeline flow */
+    .flow { margin-top: 24px; display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+    .step {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 18px; box-shadow: var(--shadow);
+    }
+    .step-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .step-head b { font-size: 14.5px; font-weight: 650; }
+    .step-head > span { font-size: 13px; color: var(--muted); }
+    .arrow { text-align: center; color: var(--muted); font-size: 14px; line-height: 1; padding: 8px 0; }
+    .branches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .branch { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+    .branch-title {
+      padding: 10px 16px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+      background: var(--accent-soft); color: var(--accent);
+    }
+    .stage { padding: 12px 16px; border-top: 1px solid var(--border); }
+    .stage:first-of-type { border-top: none; }
+    .stage-label { font-size: 11.5px; color: var(--muted); margin-bottom: 6px; }
+    .agents { display: flex; flex-wrap: wrap; gap: 6px; }
+    .agent {
+      font-size: 12.5px; padding: 3px 9px; border-radius: 6px;
+      background: var(--surface-2); border: 1px solid var(--border);
+    }
+    .agent i { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--accent); margin-right: 4px; }
+    .cond {
+      font-size: 12.5px; color: var(--text-2); background: var(--ok-soft);
+      border-radius: 6px; padding: 6px 10px; margin-top: 2px;
+    }
+
+    .note {
+      margin-top: 18px; padding: 14px 16px; border-radius: 10px;
+      background: var(--warn-soft); color: var(--text-2); font-size: 14px;
+    }
+    .note b { color: var(--warn); }
+
+    /* Abstract */
+    .abstract {
+      margin-top: 24px; background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent); border-radius: 12px; padding: 24px 28px; box-shadow: var(--shadow);
+      color: var(--text-2);
+    }
+    .abstract strong { color: var(--text); }
+
+    footer { border-top: 1px solid var(--border); background: var(--surface); }
+    .footer-inner {
+      max-width: 960px; margin: 0 auto; padding: 18px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+      font-size: 13px; color: var(--muted);
+    }
+    .footer-inner a { text-decoration: none; margin-left: 14px; }
+    .footer-inner a:hover { color: var(--text); }
+
+    @media (max-width: 760px) {
+      .topbar-inner, .page, .footer-inner { padding-left: 16px; padding-right: 16px; }
+      .topbar .nav-link { display: none; }
+      .hero { padding-top: 40px; }
+      .hero h1 { font-size: 28px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2, .grid-3, .branches { grid-template-columns: minmax(0, 1fr); }
+      section { padding-top: 44px; }
+      .abstract { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">
+      <img class="brand-mark" src="logo.svg" alt="AlgoMentor logo">
+      <span class="brand-name">AlgoMentor</span>
+    </a>
+    <a class="nav-link" href="#modes">Modes</a>
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="nav-link" href="#stack">Tech stack</a>
+    <a class="nav-link" href="#abstract">Abstract</a>
+    <button class="btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <a class="btn primary" href="/">Open app</a>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ─── Hero ─── -->
+  <section class="hero">
+    <div class="eyebrow">About the project</div>
+    <h1><span>AlgoMentor</span></h1>
+    <p class="tagline">AI-Assisted Multi-Language Code Intelligence System</p>
+    <p class="lead">
+      A full-stack AI code tutor that analyzes programs, explains algorithms, and teaches
+      optimization through a pipeline of specialized LLM agents.
+    </p>
+    <div class="hero-actions">
+      <a class="btn primary" href="/">Try it now →</a>
+      <a class="btn" href="#how">See how it works</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>4</b><span>Languages — Python, Java, C, C++</span></div>
+      <div class="stat"><b>2</b><span>Modes — Code &amp; Problem</span></div>
+      <div class="stat"><b>10</b><span>Specialized agents</span></div>
+      <div class="stat"><b>∞</b><span>Problems to explore</span></div>
+    </div>
+  </section>
+
+  <!-- ─── Modes ─── -->
+  <section id="modes">
+    <div class="eyebrow">What it does</div>
+    <h2>Two modes. One pipeline.</h2>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">{ }</div>
+        <h3>Code Mode</h3>
+        <div class="sub">Paste code in Python, Java, C, or C++</div>
+        <p>
+          The system explains what the code does, analyzes its worst-case time and space complexity,
+          and checks whether it is <strong>correct</strong> and <strong>optimal</strong>.
+        </p>
+        <p>
+          If it is buggy or slow, it doesn't just tell you — it finds the root cause, recommends
+          a better data structure and strategy, and shows a brute-force and an optimal rewrite side by side.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-icon">?</div>
+        <h3>Problem Mode</h3>
+        <div class="sub">Describe a problem in plain English</div>
+        <p>
+          Pick a language (or let the system use the one you mention) and get a brute-force solution,
+          an optimal solution, a step-by-step dry run, edge cases, and a final complexity summary.
+        </p>
+        <p>
+          If the simple approach is already optimal — like a tree traversal — the system says so
+          instead of inventing a "better" one.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Agent design ─── -->
+  <section>
+    <div class="eyebrow">Agent design</div>
+    <h2>Specialized agents, not one giant prompt.</h2>
+    <p class="lead">
+      Each agent has one narrow job: classify, explain, measure, judge, diagnose, recommend,
+      generate, or summarize. Narrow prompts produce more reliable answers than a single
+      do-everything prompt.
+    </p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <h3>Grounded in earlier results</h3>
+        <p>Later agents receive what earlier ones produced — the dry run traces the exact optimal code shown, and the summary copies complexities from the real solutions.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧾</div>
+        <h3>Structured decisions</h3>
+        <p>Classification, code review, and strategy choices come back as JSON, so the pipeline branches on clear yes/no answers instead of guessing from free text.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Parallel stages</h3>
+        <p>Agents that don't depend on each other run at the same time, so a full analysis finishes faster than running them one by one.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Pipeline ─── -->
+  <section id="how">
+    <div class="eyebrow">System flow</div>
+    <h2>How the pipeline executes</h2>
+
+    <div class="flow">
+      <div class="step">
+        <div class="step-head"><b>Input</b><span>Source code or a plain-English problem, plus an optional language</span></div>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="step">
+        <div class="step-head"><b><span class="agent"><i>01</i>Input &amp; language detector</span></b>
+          <span>Decides code vs. problem, detects the language, and states the intended task</span></div>
+      </div>
+      <div class="arrow">↓</div>
+
+      <div class="branches">
+        <div class="branch">
+          <div class="branch-title">Code mode</div>
+          <div class="stage">
+            <div class="stage-label">Stage 1 · in parallel</div>
+            <div class="agents">
+              <span class="agent"><i>02</i>Code explainer</span>
+              <span class="agent"><i>03</i>Complexity analyzer</span>
+              <span class="agent"><i>04</i>Quality judge</span>
+              <span class="agent"><i>06</i>DS &amp; strategy advisor</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="cond">Correct and optimal? → skip straight to the summary</div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Stage 2 · in parallel (buggy or slow code)</div>
+            <div class="agents">
+              <span class="agent"><i>05</i>Root cause</span>
+              <span class="agent"><i>07</i>Brute force</span>
+              <span class="agent"><i>08</i>Optimal *</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Stage 3</div>
+            <div class="agents"><span class="agent"><i>09</i>Explanation &amp; dry run</span></div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <div class="branch-title">Problem mode</div>
+          <div class="stage">
+            <div class="stage-label">Stage 1 · in parallel</div>
+            <div class="agents">
+              <span class="agent"><i>06</i>DS &amp; strategy advisor</span>
+              <span class="agent"><i>07</i>Brute force</span>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Stage 2</div>
+            <div class="agents"><span class="agent"><i>08</i>Optimal *</span></div>
+          </div>
+          <div class="stage">
+            <div class="stage-label">Stage 3</div>
+            <div class="agents"><span class="agent"><i>09</i>Explanation &amp; dry run</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">↓</div>
+      <div class="step">
+        <div class="step-head"><b><span class="agent"><i>10</i>Final summary</span></b>
+          <span>Complexity table and key takeaway, built only from the results above</span></div>
+      </div>
+    </div>
+
+    <p class="lead" style="font-size:13.5px">
+      * Agent 08 runs only when a strictly better approach than brute force exists.
+      Otherwise the system reports that the brute-force approach is already optimal and explains that one.
+    </p>
+  </section>
+
+  <!-- ─── Tech stack ─── -->
+  <section id="stack">
+    <div class="eyebrow">Tech stack</div>
+    <h2>Built with pragmatic tools</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <h3>FastAPI</h3>
+        <div class="sub">Python · REST backend</div>
+        <p>Serves the <code>/api/analyze</code> endpoint, validates requests with Pydantic, orchestrates the agent pipeline, and returns clear error messages.</p>
+        <div class="pills"><span class="pill">REST</span><span class="pill">Pydantic</span><span class="pill">Python</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h3>Groq LLM API</h3>
+        <div class="sub">openai/gpt-oss-120b (configurable)</div>
+        <p>Fast cloud inference for every agent. The model, temperature, and retry count are set in <code>.env</code>; rate-limit retries are handled automatically.</p>
+        <div class="pills"><span class="pill">cloud</span><span class="pill">fast</span><span class="pill">configurable</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧭</div>
+        <h3>Orchestrator</h3>
+        <div class="sub">Python · thread pool</div>
+        <p>Routes code vs. problem input, runs independent agents in parallel, and skips steps that aren't needed (for example, optimal code needs no rewrite).</p>
+        <div class="pills"><span class="pill">parallel</span><span class="pill">branching</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <h3>Vanilla JavaScript</h3>
+        <div class="sub">No framework · no build step</div>
+        <p>Fetch calls to the backend, collapsible result cards, copy buttons, examples, and light/dark themes — plain HTML, CSS, and JS.</p>
+        <div class="pills"><span class="pill">fetch</span><span class="pill">async/await</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📝</div>
+        <h3>Markdown rendering</h3>
+        <div class="sub">marked · DOMPurify · highlight.js</div>
+        <p>Agent output is rendered as Markdown, sanitized before display, and code blocks are syntax-highlighted for Python, Java, C, and C++.</p>
+        <div class="pills"><span class="pill">safe HTML</span><span class="pill">syntax colors</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>Single server</h3>
+        <div class="sub">FastAPI static files</div>
+        <p>The same process serves the API and the frontend, so the whole app starts with one command: <code>uvicorn main:app</code>.</p>
+        <div class="pills"><span class="pill">self-contained</span><span class="pill">one command</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Privacy note:</b> code and problems you submit are sent to the Groq API for analysis.
+      Don't paste secrets, passwords, or proprietary code you aren't allowed to share.
+    </div>
+  </section>
+
+  <!-- ─── Abstract ─── -->
+  <section id="abstract">
+    <div class="eyebrow">Research abstract</div>
+    <h2>The problem this solves</h2>
+    <div class="abstract">
+      <p>
+        The growing use of artificial intelligence in software development, competitive programming,
+        and technical interview preparation has created new opportunities for intelligent code assistance.
+        Most existing tools, however, focus on code execution or generation alone — without structured
+        feedback, step-by-step reasoning, or optimization guidance grounded in data structures and algorithms.
+      </p>
+      <p>
+        This project introduces <strong>AlgoMentor</strong>, an AI-enhanced algorithmic code tutor: a multi-language,
+        orchestration-based system designed to analyze user-written code, interpret problem statements,
+        suggest algorithmic improvements, and teach optimal solutions through detailed explanation.
+      </p>
+      <p>
+        The system supports both Code Mode and Problem Mode across Python, Java, C, and C++. It runs a
+        pipeline of specialized LLM agents covering input classification and language detection, explanation,
+        complexity analysis, correctness and optimality review, root-cause diagnosis, data structure and
+        strategy recommendation, solution generation, dry-run explanation, and summarization. Each agent builds
+        on the outputs of earlier agents, which keeps explanations, dry runs, and complexity claims
+        consistent with the code actually shown.
+      </p>
+      <p>
+        By combining LLM reasoning with DSA knowledge, the tool works at once as an intelligent tutor,
+        an interview preparation assistant, and an algorithm explainer.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>An AI-assisted algorithmic tutor for serious programmers.</span>
+    <span>
+      <a href="/">Open app</a>
+      <a href="#stack">Tech stack</a>
+      <a href="#abstract">Abstract</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+function syncThemeBtn() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('themeBtn').textContent = dark ? '☀️ Light' : '🌙 Dark';
+}
+function toggleTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (dark) document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', 'dark');
+  try { localStorage.setItem('codetutor-theme', dark ? 'light' : 'dark'); } catch (e) {}
+  syncThemeBtn();
+}
+syncThemeBtn();
+</script>
+</body>
+</html>
