@@ -3,3 +3,5 @@ uvicorn==0.54.0
 pydantic==2.13.5
 groq==1.7.0
 python-dotenv==1.2.3
+sqlalchemy==2.1.5
+pymysql==1.2.3

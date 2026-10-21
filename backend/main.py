@@ -6,8 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.routes import router
+from db.database import init_db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+
+# Create tables on startup (the app still runs if the database is unreachable)
+init_db()
 
 app = FastAPI(title="AlgoMentor — AI-Assisted Multi-Language Code Intelligence System")
 

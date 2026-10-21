@@ -39,3 +39,6 @@ class AnalyzeResponse(BaseModel):
     solutions: Solutions
     solution_explanation: Optional[str] = None
     summary: Optional[str] = None
+
+    id: Optional[int] = None    # history id (None if not saved)
+    cached: bool = False        # True if served from the cache (no LLM calls)

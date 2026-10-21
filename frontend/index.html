@@ -130,6 +130,21 @@
     .example:hover { background: var(--surface-2); color: var(--text); }
     .example small { display: block; color: var(--muted); font-size: 11px; }
 
+    .history-item { position: relative; }
+    .history-item .example { padding-right: 28px; }
+    .history-item .example span {
+      display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .history-del {
+      position: absolute; top: 6px; right: 4px;
+      border: none; background: none; color: var(--muted);
+      width: 22px; height: 22px; border-radius: 5px; font-size: 14px; line-height: 1;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .history-item:hover .history-del, .history-del:focus { opacity: 1; }
+    .history-del:hover { background: var(--border); color: var(--text); }
+    .history-empty { font-size: 12.5px; color: var(--muted); padding: 2px 8px; }
+
     .pipeline { list-style: none; padding: 0 8px; }
     .pipeline li { display: flex; gap: 10px; font-size: 12.5px; color: var(--text-2); padding: 3px 0; }
     .pipeline .num { font-family: var(--mono); font-size: 11px; color: var(--accent); min-width: 34px; padding-top: 1px; }
@@ -362,6 +377,11 @@
     <button class="new-chat" onclick="newChat()">＋ New analysis</button>
 
     <div class="side-section">
+      <div class="side-title">Recent</div>
+      <div id="history"><div class="history-empty">No analyses yet</div></div>
+    </div>
+
+    <div class="side-section">
       <div class="side-title">Try an example</div>
       <div id="sideExamples"></div>
     </div>
@@ -428,6 +448,23 @@
 const $ = id => document.getElementById(id);
 const input = $('input');
 let mode = 'auto';
+
+// Anonymous id for this browser: the server keeps each browser's history separate
+const CLIENT_ID = (() => {
+  const make = () => (window.crypto?.randomUUID?.() ||
+    Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
+  try {
+    let id = localStorage.getItem('algomentor-client-id');
+    if (!id) { id = make(); localStorage.setItem('algomentor-client-id', id); }
+    return id;
+  } catch (e) {
+    return make();
+  }
+})();
+
+function api(path, opts = {}) {
+  return fetch(path, { ...opts, headers: { 'X-Client-Id': CLIENT_ID, ...(opts.headers || {}) } });
+}
 
 const EXAMPLES = [
   { title: 'Two Sum', sub: 'Problem', mode: 'problem',
@@ -619,6 +656,7 @@ function renderResult(data) {
     `<span class="tag accent">${escHtml(data.mode)}</span>`,
     `<span class="tag">${escHtml(data.language)}</span>`,
     data.classification && `<span class="tag">${escHtml(data.classification.strategy)}</span>`,
+    data.cached && `<span class="tag" title="Same question as before, answered instantly from saved results">⚡ Cached</span>`,
   ].filter(Boolean).join('');
 
   const notes = data.notes?.length
@@ -674,7 +712,7 @@ async function analyze() {
   const stopLoading = showLoading();
 
   try {
-    const res = await fetch('/api/analyze', {
+    const res = await api('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -682,7 +720,7 @@ async function analyze() {
     const data = await res.json().catch(() => null);
     stopLoading();
     if (!res.ok || !data) appendAI(`<div class="error">✕ ${escHtml(errorText(data, res.status))}</div>`);
-    else renderResult(data);
+    else { renderResult(data); loadHistory(); }
   } catch (e) {
     stopLoading();
     appendAI(`<div class="error">✕ Cannot reach the backend. Make sure the FastAPI server is running.</div>`);
@@ -691,7 +729,60 @@ async function analyze() {
   input.focus();
 }
 
+/* ─── History ─── */
+function timeAgo(iso) {
+  const sec = Math.max(0, (Date.now() - new Date(iso)) / 1000);
+  if (sec < 60) return 'just now';
+  if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+  return Math.floor(sec / 86400) + 'd ago';
+}
+
+async function loadHistory() {
+  let items = [];
+  try {
+    const res = await api('/api/history');
+    if (res.ok) items = await res.json();
+  } catch (e) { /* offline: keep the list empty */ }
+
+  const box = $('history');
+  if (!items.length) {
+    box.innerHTML = '<div class="history-empty">No analyses yet</div>';
+    return;
+  }
+  box.innerHTML = items.map(it => `
+    <div class="history-item">
+      <button class="example" data-open="${it.id}" title="${escHtml(it.title)}">
+        <span>${escHtml(it.title)}</span>
+        <small>${escHtml(it.mode || '')} · ${escHtml(it.language || '')} · ${timeAgo(it.created_at)}</small>
+      </button>
+      <button class="history-del" data-del="${it.id}" title="Delete" aria-label="Delete">×</button>
+    </div>`).join('');
+  box.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openHistory(+b.dataset.open));
+  box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteHistory(+b.dataset.del));
+}
+
+async function openHistory(id) {
+  try {
+    const res = await api('/api/history/' + id);
+    if (!res.ok) throw new Error();
+    const item = await res.json();
+    $('threadInner').innerHTML = '';
+    appendUser(item.input);
+    renderResult(item.result);
+    $('thread').scrollTop = 0;
+  } catch (e) {
+    appendAI('<div class="error">✕ Could not load this analysis.</div>');
+  }
+}
+
+async function deleteHistory(id) {
+  try { await api('/api/history/' + id, { method: 'DELETE' }); } catch (e) {}
+  loadHistory();
+}
+
 renderEmpty();
+loadHistory();
 input.focus();
 </script>
 </body>
